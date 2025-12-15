@@ -3,186 +3,191 @@ import os
 from PIL import Image
 import base64
 
-# --- 1. 페이지 설정 ---
+# --- 1. 페이지 설정 (반드시 최상단) ---
 st.set_page_config(
-    page_title="ABYSS: Deep Sea Wonders Exhibition",
-    page_icon="🐙",
+    page_title="THE ABYSS: ARCHIVE",
+    page_icon="🏛️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed" # 사이드바를 숨겨서 더 넓고 깔끔하게
 )
 
-# --- 2. 커스텀 CSS (심해 박물관 테마) ---
+# --- 2. 고급스러운 박물관 스타일 CSS ---
 def local_css():
     st.markdown("""
     <style>
-        /* 전체 배경: 깊은 바다 그라데이션 */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap');
+
+        /* 전체 배경: 완전한 칠흑색 (고급스러움 강조) */
         .stApp {
-            background-color: #020510;
-            background-image: linear-gradient(to bottom, #000005, #000a20, #000d30);
+            background-color: #050505;
             color: #E0E0E0;
-            font-family: 'Georgia', serif;
+            font-family: 'Lato', sans-serif;
         }
-        
-        /* 헤더 및 타이틀: 웅장하고 빛나는 느낌 */
-        h1 {
-            font-family: 'Times New Roman', serif;
-            color: #BBDEFB;
-            text-shadow: 0 0 15px rgba(187, 222, 251, 0.7), 0 0 30px rgba(187, 222, 251, 0.4);
+
+        /* 타이틀 폰트: 우아한 명조체 (Serif) */
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* 메인 타이틀 스타일: 금빛 그라데이션 텍스트 */
+        .main-title {
+            font-size: 3.5em;
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 2px solid rgba(187, 222, 251, 0.3);
-            margin-bottom: 40px;
-        }
-        
-        h2 {
-            color: #81D4FA;
-            font-family: 'Georgia', serif;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(129, 212, 250, 0.2);
-            padding-bottom: 10px;
+            background: -webkit-linear-gradient(#eee, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 50px;
+            margin-bottom: 10px;
         }
 
-        /* 서브 헤더 */
-        h3 {
-            color: #90CAF9;
-            font-family: 'Georgia', serif;
-            border-bottom: 1px solid rgba(144, 202, 249, 0.2);
-            padding-bottom: 8px;
-            margin-top: 25px;
+        .sub-title {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            color: #888;
+            font-size: 1.0em;
+            letter-spacing: 5px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
         }
 
-        /* 일반 텍스트 */
-        p {
-            font-size: 1.05em;
-            line-height: 1.6;
-        }
-
-        /* 구분선 */
-        hr {
-            border-top: 1px solid rgba(187, 222, 251, 0.1);
-            margin: 30px 0;
-        }
-
-        /* 사이드바 */
-        [data-testid="stSidebar"] {
-            background-color: #010308;
-            border-right: 1px solid #1a237e;
-            padding: 20px;
-        }
-        
-        /* 이미지 컨테이너 (전시 패널 느낌) */
+        /* 이미지 카드 스타일: 미니멀한 액자 느낌 */
         div[data-testid="stImage"] {
-            border: 2px solid #1A237E;
-            border-radius: 12px;
-            padding: 8px;
-            background-color: #080C1A;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.7), 0 0 10px rgba(26, 35, 126, 0.4);
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            margin-bottom: 25px;
+            border: 1px solid #222;
+            padding: 15px;
+            background-color: #0f0f0f;
+            transition: all 0.4s ease;
         }
         
         div[data-testid="stImage"]:hover {
-            transform: translateY(-5px) scale(1.02);
-            border: 2px solid #00FFFF;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.8), 0 0 25px rgba(0, 255, 255, 0.6);
+            border-color: #C5A059; /* 앤티크 골드색 */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        /* 캡션 텍스트 */
-        .specimen-caption {
-            color: #B0BEC5;
+        /* 캡션 스타일: 도록 설명처럼 작고 깔끔하게 */
+        .caption-style {
+            font-family: 'Playfair Display', serif;
+            color: #C5A059; /* 골드 포인트 */
+            font-size: 1.1em;
+            margin-top: 10px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .desc-style {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        /* 구분선 스타일 */
+        hr {
+            border-top: 1px solid #222;
+            margin: 50px 0;
+        }
+        
+        /* Expander 스타일 커스텀 (상세보기 버튼) */
+        .streamlit-expanderHeader {
+            font-family: 'Lato', sans-serif;
             font-size: 0.9em;
-            text-align: center;
-            margin-top: -15px;
-            margin-bottom: 20px;
-            font-family: 'Roboto', sans-serif;
-            font-style: italic;
-        }
-
-        /* 인포 박스 */
-        .stAlert {
-            background-color: rgba(26, 35, 126, 0.3);
-            border-left: 5px solid #00B0FF;
-            color: #E0E0E0;
+            color: #666;
         }
     </style>
     """, unsafe_allow_html=True)
 
 local_css()
 
-# --- 3. 배경 음악 추가 (자동 재생) ---
-# audio 폴더가 없거나 파일이 없으면 에러 없이 넘어갑니다.
-audio_file_path = "audio/deep_sea_ambient.mp3"
-if os.path.exists(audio_file_path):
-    with open(audio_file_path, "rb") as audio_file:
-        audio_bytes = audio_file.read()
-    st.audio(audio_bytes, format="audio/mp3", start_time=0, loop=True, autoplay=True)
-else:
-    # 파일이 없을 경우 사이드바에 조용히 알림
-    st.sidebar.warning("⚠️ 배경 음악 파일 없음 (audio/deep_sea_ambient.mp3)")
+# --- 3. 오디오 가이드 (배경 음악) ---
+# audio/deep_sea_ambient.mp3 파일이 있어야 재생됩니다.
+audio_path = "audio/deep_sea_ambient.mp3"
 
-# --- 4. 사이드바 (큐레이터 노트) ---
-with st.sidebar:
-    st.header("🌌 심해 박물관")
-    st.markdown("---")
+if os.path.exists(audio_path):
+    # 화면에 플레이어를 작게 숨기거나 하단에 배치
+    with open(audio_path, "rb") as f:
+        audio_bytes = f.read()
+        # autoplay=True로 자동 재생
+        st.audio(audio_bytes, format="audio/mp3", start_time=0)
+        # 플레이어를 시각적으로 숨기고 싶으면 아래 주석 해제 (CSS로 숨김 처리)
+        # st.markdown("<style>audio {display:none;}</style>", unsafe_allow_html=True) 
+else:
+    # 파일이 없으면 조용히 넘어감 (에러 메시지로 디자인 망치지 않음)
+    pass
+
+# --- 4. 메인 전시 공간 ---
+
+# 헤더 섹션
+st.markdown("<h1 class='main-title'>THE ABYSS</h1>", unsafe_allow_html=True)
+st.markdown("<div class='sub-title'>Unknown Specimens Exhibition</div>", unsafe_allow_html=True)
+
+st.write("") # 여백
+st.write("") 
+
+# 인트로 텍스트 (박물관 벽면 텍스트 느낌)
+c1, c2, c3 = st.columns([1, 2, 1])
+with c2:
     st.markdown("""
-    **전시 주제: ABYSSAL WONDERS**
-    <p style='font-size:0.9em;'>인류가 미처 도달하지 못한 심해의 신비로운 영역에서, AI가 상상으로 빚어낸 미지의 생명체들을 소개합니다.</p>
+    <div style='text-align: center; color: #aaa; font-style: italic; font-family: "Playfair Display", serif;'>
+    "우리가 알지 못하는 심연의 깊은 곳, <br>
+    그곳에는 빛조차 닿지 않는 영원한 어둠 속에서 피어난 생명들이 있습니다."
+    </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.subheader("탐사 데이터")
-    st.write(f"**현재 관측 수심:** {st.slider('시뮬레이션 수심', 0, 10000, 7500, 500)}m")
-    st.write("**수압:** 약 750 기압")
-    
-    st.markdown("---")
-    st.info("본 전시에 소개된 생물들은 생성형 AI에 의해 구현된 가상의 존재입니다.")
+st.markdown("---")
 
-# --- 5. 메인 헤더 (전시회 메인 간판) ---
-st.title("DEEP SEA WONDERS")
-st.markdown("<p style='text-align: center; color: #BBDEFB; font-size: 1.2em;'>The Abyssal Archive Project</p>", unsafe_allow_html=True)
-st.divider()
-
-st.header("✨ 심연의 조각들: 컬렉션")
-st.markdown("""
-심해의 어둠 속에서, 우리는 AI의 눈을 통해 전에 없던 생명체들을 조우합니다. 
-각각의 표본은 고유한 빛과 형태, 그리고 심연에 적응한 생존 전략을 보여줍니다.
-""")
-st.divider()
-
-# --- 6. 이미지 갤러리 로직 ---
+# --- 5. 갤러리 로직 ---
 image_folder = "images"
 
 if not os.path.exists(image_folder):
-    st.error("❌ 'images' 폴더를 찾을 수 없습니다. 프로젝트 폴더 안에 images 폴더를 생성하고 사진을 넣어주세요.")
+    st.error("System Error: Image archive not found.")
 else:
-    files = os.listdir(image_folder)
+    files = sorted(os.listdir(image_folder)) # 파일 이름순 정렬
     image_files = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
 
     if not image_files:
-        st.warning("📂 전시할 표본이 없습니다. 'images' 폴더에 사진을 추가하세요!")
+        st.write("No specimens available.")
     else:
-        cols = st.columns(3) # 3열 그리드
+        # 3열 그리드 (여백을 넉넉하게)
+        cols = st.columns(3)
         
         for idx, file_name in enumerate(image_files):
             file_path = os.path.join(image_folder, file_name)
             img = Image.open(file_path)
             
-            # 파일명 가공
-            display_name = file_name.split('.')[0].replace("Gemini_Generated_Image_", "").replace("_", " ").title()
+            # 이름 가공
+            raw_name = file_name.split('.')[0].replace("Gemini_Generated_Image_", "").replace("_", " ")
             
-            # 열 순서대로 배치
             with cols[idx % 3]:
+                # 이미지 출력
                 st.image(img, use_container_width=True)
-                st.markdown(f"<div class='specimen-caption'>SPECIMEN ID: <span style='color:#00B0FF;'>{display_name}</span></div>", unsafe_allow_html=True)
                 
-                # 상세 정보
-                with st.expander(f"👁️‍🗨️ [{display_name}] 표본 상세 분석"):
-                    st.markdown(f"**학명:** *Abyssalis {display_name.replace(' ', '_').lower()}*")
-                    st.markdown(f"**발견 심도:** 약 {3000 + (idx * 450)}m")
-                    st.markdown(f"**위험 등급:** {'🔴 위험' if idx % 2 == 0 else '🟡 주의'}")
-                    st.code(f"Log: 2.1°C / pH 6.8", language="text")
+                # 작품 설명 (박물관 캡션 스타일)
+                st.markdown(f"<div class='caption-style'>Specimen No. {idx+1 :03d}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='desc-style'>**Designation:** {raw_name.upper()}</div>", unsafe_allow_html=True)
+                
+                # 미니멀한 상세보기
+                with st.expander("View Details"):
+                    st.markdown(f"""
+                    <div style='font-size: 0.8em; color: #bbb;'>
+                    • <b>Estimated Depth:</b> {4000 + (idx * 350)}m<br>
+                    • <b>Environment:</b> High Pressure / Zero Light<br>
+                    • <b>Status:</b> Cataloged by AI
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.write("") # 카드 간 간격 조절
+                st.write("")
 
-# --- 7. 푸터 ---
-st.divider()
-st.markdown("<p style='text-align: center; color: #444; font-size: 0.8em;'>© 2024 ABYSSAL RESEARCH INITIATIVE.</p>", unsafe_allow_html=True)
+# --- 6. 푸터 ---
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; font-size: 0.7em; color: #444; letter-spacing: 2px;'>
+MUSEUM OF GENERATIVE BIOLOGY &copy; 2024
+</div>
+""", unsafe_allow_html=True)
