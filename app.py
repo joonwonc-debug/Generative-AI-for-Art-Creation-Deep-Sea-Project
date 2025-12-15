@@ -134,8 +134,8 @@ c1, c2, c3 = st.columns([1, 2, 1])
 with c2:
     st.markdown("""
     <div style='text-align: center; color: #aaa; font-style: italic; font-family: "Playfair Display", serif;'>
-    "우리가 알지 못하는 심연의 깊은 곳, <br>
-    그곳에는 빛조차 닿지 않는 영원한 어둠 속에서 피어난 생명들이 있습니다."
+    "Generative AI for Art Creation, <br>
+    Undiscovered Creatures Generated Image Under Deep Sea."
     </div>
     """, unsafe_allow_html=True)
 
